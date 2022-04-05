@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/dwaynelavon/weissach/trackflow-cloud-tasks/tasks"
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,8 +30,14 @@ func CompleteSignUpHandler(c *gin.Context) {
 	queueID := os.Getenv("GCLOUD_TASKS_SIGN_UP_CONFIRMATION_QUEUE")
 
 	tasks := tasks.Task()
-	_, err := tasks.CompleteSignUp(projectID, locationID, queueID, json.To)
+	_, err := tasks.CreateSignUpConfirmationTask(c, projectID, locationID, queueID, json.To)
 	if err != nil {
+		if hub := sentrygin.GetHubFromContext(c); hub != nil {
+			hub.WithScope(func(scope *sentry.Scope) {
+				scope.SetExtra("to", json.To)
+				hub.CaptureMessage("Unable to create sign up completion task")
+			})
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -6,16 +6,26 @@ import (
 	"os"
 
 	"github.com/dwaynelavon/weissach/trackflow-cloud-tasks/handlers"
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 )
 
 var pingPath = "/ping"
 
 func main() {
-	r := gin.Default()
-	r.GET(pingPath, pingHandler)
-	r.POST(handlers.CompleteSignUpPath, handlers.CompleteSignUpHandler)
-	r.POST(handlers.SendEmailTaskHandlerPath, handlers.SendEmailHandler)
+	sentryDsn := os.Getenv("SENTRY_DSN")
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn: sentryDsn,
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v\n", err)
+	}
+
+	app := gin.Default()
+	app.Use(sentrygin.New(sentrygin.Options{}))
+	app.GET(pingPath, pingHandler)
+	app.POST(handlers.CompleteSignUpPath, handlers.CompleteSignUpHandler)
+	app.POST(handlers.SendEmailTaskHandlerPath, handlers.SendEmailHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -24,7 +34,7 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	if err := r.Run(fmt.Sprintf(":%s", port)); err != nil {
+	if err := app.Run(fmt.Sprintf(":%s", port)); err != nil {
 		log.Fatal(err)
 	}
 }

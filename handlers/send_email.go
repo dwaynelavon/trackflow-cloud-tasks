@@ -6,6 +6,8 @@ import (
 	"os"
 
 	tfwTasks "github.com/dwaynelavon/weissach/trackflow-cloud-tasks/tasks"
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,8 +54,14 @@ func SendEmailHandler(c *gin.Context) {
 		}
 
 		log.Printf("Sending Sign Up Confirmation Email to %v", json.To)
-		emailResp, err := tasks.SendSignUpConfirmationEmail(json.To)
+		emailResp, err := tasks.SendSignUpConfirmationEmail(c, json.To)
 		if err != nil {
+			if hub := sentrygin.GetHubFromContext(c); hub != nil {
+				hub.WithScope(func(scope *sentry.Scope) {
+					scope.SetExtra("to", json.To)
+					hub.CaptureMessage("Unable to send sign up completion email")
+				})
+			}
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(), "msg": "Error sending sign up confirmation email",
 			})

@@ -37,16 +37,16 @@ func createSignUpEmailConfirmationTask(
 }
 
 /**
- * CompleteSignUp creates a new task to schedule Sign Up
+ * CreateSignUpConfirmationTask creates a new task to schedule Sign Up
  * completion tasks.
  */
-func (tasks *tasks) CompleteSignUp(
+func (tasks *tasks) CreateSignUpConfirmationTask(
+	ctx context.Context,
 	projectID,
 	locationID,
 	queueID,
 	to string,
 ) (*taskspb.Task, error) {
-	ctx := context.Background()
 	client, err := cloudtasks.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("NewClient: %v", err)
@@ -79,14 +79,14 @@ func (tasks *tasks) CompleteSignUp(
 	return emailTask, nil
 }
 
-func (tasks *tasks) SendSignUpConfirmationEmail(to string) (
+func (tasks *tasks) SendSignUpConfirmationEmail(ctx context.Context, to string) (
 	sendinblue.CreateSmtpEmail,
 	error,
 ) {
 	email := email.Email()
 	emailService := email.Client.TransactionalEmailsApi
 	emailResponse, _, err := emailService.SendTransacEmail(
-		context.Background(),
+		ctx,
 		sendinblue.SendSmtpEmail{
 			To: []sendinblue.SendSmtpEmailTo{
 				{Email: to},
