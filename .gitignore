@@ -1,3 +1,12 @@
+.env
+env_variables.yaml
+
+# Service account
+trackflow-weissach-a5b8d24036c9.json
+
+# Build files
+trackflow-cloud-tasks
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -13,3 +22,5 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+.vscode
