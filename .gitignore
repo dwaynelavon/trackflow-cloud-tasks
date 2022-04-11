@@ -1,6 +1,8 @@
 .env
 env_variables.yaml
 
+env_variables.dev.yaml
+
 # Service account
 trackflow-weissach-a5b8d24036c9.json
 

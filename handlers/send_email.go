@@ -27,7 +27,7 @@ func SendEmailHandler(c *gin.Context) {
 
 	var header sendEmailHeader
 	if err := c.ShouldBindHeader(&header); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Headers"})
 		return
 	}
 

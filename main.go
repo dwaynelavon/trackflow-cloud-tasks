@@ -22,14 +22,16 @@ func main() {
 	}
 
 	app := gin.Default()
+	_ = app.SetTrustedProxies([]string{os.Getenv("TRUSTED_PROXY")})
 	app.Use(sentrygin.New(sentrygin.Options{}))
+	app.Use(handlers.CORSMiddleware())
 	app.GET(pingPath, pingHandler)
 	app.POST(handlers.CompleteSignUpPath, handlers.CompleteSignUpHandler)
 	app.POST(handlers.SendEmailTaskHandlerPath, handlers.SendEmailHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		port = "8080"
 		log.Printf("Defaulting to port %s", port)
 	}
 

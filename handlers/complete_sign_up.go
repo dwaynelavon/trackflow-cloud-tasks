@@ -21,7 +21,7 @@ func CompleteSignUpHandler(c *gin.Context) {
 
 	var json tasks.SignUpConfirmationEmailBody
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
@@ -30,7 +30,13 @@ func CompleteSignUpHandler(c *gin.Context) {
 	queueID := os.Getenv("GCLOUD_TASKS_SIGN_UP_CONFIRMATION_QUEUE")
 
 	tasks := tasks.Task()
-	_, err := tasks.CreateSignUpConfirmationTask(c, projectID, locationID, queueID, json.To)
+	_, err := tasks.CreateSignUpConfirmationTask(
+		c,
+		projectID,
+		locationID,
+		queueID,
+		json.To,
+	)
 	if err != nil {
 		if hub := sentrygin.GetHubFromContext(c); hub != nil {
 			hub.WithScope(func(scope *sentry.Scope) {
